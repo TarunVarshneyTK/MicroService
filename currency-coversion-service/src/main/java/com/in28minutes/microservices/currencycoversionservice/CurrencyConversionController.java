@@ -1,5 +1,6 @@
 package com.in28minutes.microservices.currencycoversionservice;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +13,8 @@ import java.util.Map;
 
 @RestController
 public class CurrencyConversionController {
+    @Autowired
+    CurrencyExchangeServerProxy proxy;
 
     @GetMapping("/currency-convertor/from/{from}/to/{to}/quantity/{quantity}")
     public CurrencyConversionBean covertCurrency(@PathVariable String from, @PathVariable String to, @PathVariable BigDecimal quantity)
@@ -19,9 +22,16 @@ public class CurrencyConversionController {
         Map<String ,String > uriVariables=new HashMap<>();
         uriVariables.put("from",from);
         uriVariables.put("to",to);
-        ResponseEntity<CurrencyConversionBean> responseEntity = new RestTemplate().getForEntity("http://localhost:8000/curreny-exchange/from/USD/to/INR", CurrencyConversionBean.class, uriVariables);
+        ResponseEntity<CurrencyConversionBean> responseEntity = new RestTemplate().getForEntity("http://localhost:8000/curreny-exchange/from/{from}/to/{to}", CurrencyConversionBean.class, uriVariables);
         CurrencyConversionBean response = responseEntity.getBody();
         return new CurrencyConversionBean(response.getId(),from,to,response.getConversionMultiple(),quantity,quantity.multiply(response.getConversionMultiple()),response.getPort());
 
+    }
+
+    @GetMapping("/currency-convertor-feign/from/{from}/to/{to}/quantity/{quantity}")
+    public CurrencyConversionBean covertCurrencyFeign(@PathVariable String from, @PathVariable String to, @PathVariable BigDecimal quantity)
+    {
+        CurrencyConversionBean response = proxy.covertCurrency(from, to);
+        return new CurrencyConversionBean(response.getId(),from,to,response.getConversionMultiple(),quantity,quantity.multiply(response.getConversionMultiple()),response.getPort());
     }
 }
