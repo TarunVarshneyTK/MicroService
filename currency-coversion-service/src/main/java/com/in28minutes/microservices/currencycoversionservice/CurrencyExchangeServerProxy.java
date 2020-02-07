@@ -9,9 +9,10 @@ import java.math.BigDecimal;
 
 //@FeignClient(name="currency-exchange-service",url="http://localhost:8000")
 //Remove URl if Configure Ribbon and put URLS to property file
-@FeignClient(name="currency-exchange-service")
+//@FeignClient(name="currency-exchange-service")
+@FeignClient(name="netflix-zuul-api-gateway-server")
 @RibbonClient(name="currency-exchange-service")
 public interface CurrencyExchangeServerProxy {
-    @GetMapping("/curreny-exchange/from/{from}/to/{to}")
+    @GetMapping("/currency-exchange-service/curreny-exchange/from/{from}/to/{to}")
     public CurrencyConversionBean covertCurrency(@PathVariable String from, @PathVariable String to);
 }
